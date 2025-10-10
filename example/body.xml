@@ -1,0 +1,63 @@
+<!-- 开始界面 -->
+<div id="start-screen">
+  <h1>
+    <i class="fa fa-birthday-cake mr-2"></i>点击气球
+  </h1>
+  <div class="start-card">
+    <p>在气球飞走前点击它们得分！时间越长，气球速度越快！</p>
+    <button id="start-btn" class="btn btn-pulse">
+      开始游戏 <i class="fa fa-play ml-2"></i>
+    </button>
+    <div class="instructions">
+      <p>游戏说明:</p>
+      <ul>
+        <li><i class="fa fa-check-circle text-green-500 mr-1"></i> 点击气球得分</li>
+        <li><i class="fa fa-check-circle text-green-500 mr-1"></i> 越大的气球得分越少</li>
+        <li><i class="fa fa-check-circle text-green-500 mr-1"></i> 漏掉5个气球游戏结束</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 游戏界面 -->
+<div id="game-screen">
+  <div class="game-info score-display">
+    <i class="fa fa-star"></i>
+    <span>得分: </span>
+    <span id="score">0</span>
+  </div>
+  <div class="game-info time-display">
+    <i class="fa fa-clock-o"></i>
+    <span>时间: </span>
+    <span id="time">0</span>
+  </div>
+  <div class="game-info lives-display">
+    <i class="fa fa-heart"></i>
+    <span>生命: </span>
+    <span id="lives">5</span>
+  </div>
+  <div id="balloons-container"></div>
+</div>
+
+<!-- 结束界面 -->
+<div id="end-screen">
+  <div id="end-card">
+    <h2>游戏结束!</h2>
+    <p>你的气球之旅结束了</p>
+    
+    <div class="score-card">
+      <div class="score-item">
+        <span>最终得分</span>
+        <span id="final-score">0</span>
+      </div>
+      <div class="score-item">
+        <span>游戏时间</span>
+        <span id="final-time">0秒</span>
+      </div>
+    </div>
+    
+    <button id="restart-btn" class="btn">
+      再玩一次 <i class="fa fa-refresh ml-2"></i>
+    </button>
+  </div>
+</div>

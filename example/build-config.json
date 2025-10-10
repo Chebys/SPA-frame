@@ -1,0 +1,13 @@
+{
+	"id": "balloon-game",
+	"name": "气球",
+	"author": "Arough",
+	"desc": "小孩子爱玩的气球，一毛钱一个。",
+	"main": "main.js",
+	"overrideType": {
+		"main.js": "script"
+	},
+	"preloads": {
+		"body.xml": "text"
+	}
+}
