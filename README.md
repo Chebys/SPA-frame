@@ -90,7 +90,7 @@
 
 调试工具本质上是一个 SPA，意味着它需要通过应用包进行安装并在 SPA-frame 中运行。
 
-要获取调试工具的安装包，可以下载[预构建版本](debugger.bin)，也可以从[源代码](debugger)手动构建。
+要获取调试工具的安装包，可以下载预构建版本（即[debugger.bin](https://github.com/Chebys/SPA-frame/releases)），也可以从[源代码](debugger)手动构建。
 
 安装并启动后，根据指引进行操作即可。
 
