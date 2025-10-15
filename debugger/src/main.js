@@ -53,13 +53,9 @@ async function startDebug(id){
 	runApp(app)
 }
 
-Object.assign(document.body.style, {
-	width: '600px',
-	margin: 'auto'
-})
 let params = new URLSearchParams(location.search)
 let packageId = params.get('package')
-if(packageId){
+if(packageId && packageId!='debugger'){
 	startDebug(packageId)//.catch(alert)
 }else{
 	let ui =require('ui')

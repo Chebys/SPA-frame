@@ -15,28 +15,32 @@
 
 ### 元数据
 一个 JSON 对象，包含如下字段：
-* _ver         （可选）框架版本，暂时无用
-* version      （可选）应用版本，暂时无用
-* id            标识符，建议使用小写字母+连字符
-* author       （可选）作者
-* desc         （可选）描述
-* name          显示名称
-* icon         （可选）图标，使用 Data URL
-* main          主模块名称
-* require_path  脚本中require函数的默认查找目录
-* files         文件列表
+| 键            | 说明
+|--------------|---
+| _ver         | 目标框架版本，默认为 0
+| version      | （可选）应用版本，暂时无用
+| id           |  标识符，建议使用小写字母+连字符
+| author       | （可选）作者
+| desc         | （可选）描述
+| name         | 显示名称
+| icon         |（可选）图标，使用 Data URL
+| main         | 主模块名称
+| require_path | 脚本中require函数的默认查找目录
+| files        | 文件列表
 
 每个文件的字段：（仅name，size必选）
-* name      文件名，可包含'/'，不能以'/'开头或结束，不可重复
-* size      文件大小
-* type      'asset' 或 'script'，默认为前者
-* preload   仅用于 asset，可选值：'arrayBuffer', 'text', 'json', 'bitmap'；其中text和json仅限utf8编码（其他编码可加载为arrayBuffer并手动解码）
+| 键         | 说明
+|-----------|---
+| name      | 文件名，可包含'/'，不能以'/'开头或结束，不可重复
+| size      | 文件大小
+| type      | `asset` 或 `script`，默认为前者
+| preload   | 仅用于 asset，可选值：`arrayBuffer`, `text`, `json`, `bitmap`；其中text和json仅限utf8编码（其他编码可加载为arrayBuffer并手动解码）
 
 ### 二进制数据
 包含所有文件的二进制数据，按 files 中的顺序排列，文件之间没有分隔或填充。
 
 ### 打包
-可以使用 [build.py](build.py) 进行打包，在项目中添加 build-config.json 以进行配置。参考[示例](example/build-config.json)。
+可以使用 [build.py](https://github.com/Chebys/SPA-frame/releases) 进行打包，在项目中添加 build-config.json 以进行配置。参考[示例](example/build-config.json)。
 
 如果有更个性化的需求，请根据规定的应用包结构自行打包。
 
@@ -66,19 +70,21 @@
 ### Assets
 通过文件名访问 asset 文件，例如 `Assets['style.css']`。
 
-文件默认为 Blob 对象；可通过元数据中的 preload 字段指定其他类型。
+文件默认为 Blob 对象；可通过元数据中的 `preload` 字段指定其他类型。
 
 ### applyCSS
 
     applyCSS(text)
 
-应用css文本。实际上是创建了 CSSStyleSheet 并添加到 document.adoptedStyleSheets。
+应用css文本。实际上是创建了 CSSStyleSheet 并添加到 document.adoptedStyleSheets。返回 CSSStyleSheet 对象。
 
 ### importFont
 
-    importFont(family, fontBlob, format='opentype')
+    importFont(family, font, format='opentype')
 
 用于导入字体。
+
+`font` 为 Blob 对象或字符串。为字符串时，等价于`Assets[font]`。
 
 ### IDBStorage
 用于简化 IndexedDB 操作。详见 [idb-storage](https://github.com/Chebys/idb-storage)。
