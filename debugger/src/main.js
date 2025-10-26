@@ -44,6 +44,7 @@ async function startDebug(id){
 	}
 	let app = {
 		id,
+		name: 'debug-'+id,
 		assets,
 		scripts,
 		main: config.main,
