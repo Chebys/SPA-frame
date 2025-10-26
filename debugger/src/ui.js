@@ -12,8 +12,7 @@ let ctnStyle = {
     border: '1px solid #e1e5e9',
     borderRadius: '12px',
     backgroundColor: 'white',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
-    marginBottom: '20px'
+    boxShadow: '0 2px 10px rgba(0,0,0,0.08)'
 }
 
 let sectionTitleStyle = {
@@ -26,7 +25,7 @@ let sectionTitleStyle = {
 }
 
 let buttonStyle = {
-    padding: '10px 20px',
+    padding: '6px 12px',
     border: 'none',
     borderRadius: '5px',
     fontWeight: '600',
@@ -66,21 +65,24 @@ function showProjects(list){
     // 创建主容器
     let mainContainer = $n('div', {
         style: {
-            maxWidth: '900px',
+			maxWidth: '900px',
             margin: '0 auto',
-            padding: '30px 20px',
+            padding: '20px',
             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             backgroundColor: '#f8fafc',
-            minHeight: '100vh'
+			boxSizing: 'border-box',
+            height: '100vh',
+			display: 'flex',
+			gap: '10px'
         }
     })
     
     projectList = $n('div', {
-        style: {
-            ...ctnStyle,
-            marginBottom: '30px'
-        }
-    })
+		style: {
+			flex: 1,
+			overflowY: 'auto'
+		}
+	})
     
     // 项目列表标题
     let projectsHeader = $n('div', {
@@ -89,6 +91,12 @@ function showProjects(list){
     })
     
     let projectsContainer = $n('div', {
+		style: {
+			...ctnStyle,
+			flex: 1,
+			display: 'flex',
+			flexDirection: 'column'
+		},
         content: [
             projectsHeader,
             projectList
@@ -113,7 +121,7 @@ function showProjects(list){
     // 组装所有组件
     mainContainer.append(projectsContainer, newCtn)
     Object.assign(document.body.style, {
-		width: '600px',
+		width: '900px',
 		margin: 'auto',
 		backgroundColor: '#f8fafc'
 	})
@@ -162,7 +170,7 @@ function refreshList(list){
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '10px',
+                padding: '8px 12px',
                 border: '1px solid #e2e8f0',
                 borderRadius: '8px',
                 marginBottom: '12px',
@@ -178,38 +186,14 @@ function refreshList(list){
                 this.style.transform = 'translateY(0)'
             },
             content: [
-                $n('div', {
-                    style: {
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px'
-                    },
-                    content: [
-                        $n('div', {
-                            style: {
-                                width: '30px',
-                                height: '30px',
-                                backgroundColor: '#4361ee',
-                                borderRadius: '5px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white',
-                                fontWeight: '600',
-                                fontSize: '1.1rem'
-                            },
-                            content: id.charAt(0).toUpperCase()
-                        }),
-                        $n('div', {
-                            style: {
-                                fontWeight: '600',
-                                color: '#1e293b',
-                                fontSize: '1.05rem'
-                            },
-                            content: id
-                        })
-                    ]
-                }),
+				$n('div', {
+					content: id,
+					style: {
+						fontWeight: '600',
+						color: '#1e293b',
+						fontSize: '1.05rem'
+					}
+				}),
                 $n('div', {
                     style: {
                         display: 'flex',
@@ -217,10 +201,7 @@ function refreshList(list){
                     },
                     content: [
                         $n('button', {
-                            style: {
-                                ...primaryButtonStyle,
-                                padding: '8px 16px'
-                            },
+                            style: primaryButtonStyle,
                             onmouseover(){
                                 this.style.backgroundColor = '#3a56d4'
                             },
@@ -233,10 +214,7 @@ function refreshList(list){
                             }
                         }),
                         $n('button', {
-                            style: {
-                                ...dangerButtonStyle,
-                                padding: '8px 16px'
-                            },
+                            style: dangerButtonStyle,
                             onmouseover(){
                                 this.style.backgroundColor = '#e01a6f'
                             },
@@ -436,18 +414,6 @@ function showConfigScreen(container){
     })
     
     container.append(
-        $n('div', {
-            style: {
-                fontSize: '0.95rem',
-                color: '#6b7280',
-                marginBottom: '20px',
-                padding: '12px',
-                backgroundColor: '#fef3c7',
-                borderRadius: '6px',
-                border: '1px solid #f59e0b'
-            },
-            content: '选择项目目录并配置模块路径，然后开始调试'
-        }),
         dirSelector,
         formContainer,
         submitButton

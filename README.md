@@ -11,27 +11,27 @@
 即 [spa-frame.html](spa-frame.html)。没有任何外部依赖。
 
 ## 应用包
-一个合法的应用包由[元数据](#元数据) + '\0' + [二进制数据](#二进制数据)构成。
+一个合法的应用包由[元数据](#元数据) + `'\0'` + [二进制数据](#二进制数据)构成。
 
 ### 元数据
 一个 JSON 对象，包含如下字段：
-| 键            | 说明
+| 键           | 说明
 |--------------|---
-| _ver         | 目标框架版本，默认为 0
-| version      | （可选）应用版本，暂时无用
-| id           |  标识符，建议使用小写字母+连字符
+| id           |  标识符，使用小写字母+连字符
+| _ver         | （可选）API 版本，默认为 0
+| version      | （可选）应用版本，目前仅用于展示
 | author       | （可选）作者
 | desc         | （可选）描述
 | name         | 显示名称
 | icon         |（可选）图标，使用 Data URL
 | main         | 主模块名称
-| require_path | 脚本中require函数的默认查找目录
+| require_path | 脚本中[require](#require)函数的默认查找目录
 | files        | 文件列表
 
 每个文件的字段：（仅name，size必选）
-| 键         | 说明
+| 键        | 说明
 |-----------|---
-| name      | 文件名，可包含'/'，不能以'/'开头或结束，不可重复
+| name      | 文件名，可包含`/`，不能以`/`开头或结束，不可重复
 | size      | 文件大小
 | type      | `asset` 或 `script`，默认为前者
 | preload   | 仅用于 asset，可选值：`arrayBuffer`, `text`, `json`, `bitmap`；其中text和json仅限utf8编码（其他编码可加载为arrayBuffer并手动解码）
@@ -50,8 +50,8 @@
 ### require
 本质上是每个模块的局部变量。用于加载脚本（type为script的文件）。
 
-路径以'/'开头表示绝对路径，'./'开头表示相对当前文件的路径，否则表示相对require_path的路径。会自动添加'.js'后缀。
-* 例如，require_path为'module'，则 require('test') 表示加载名为 'module/test.js' 的脚本。
+路径以`'/'`开头表示绝对路径，`'./'`开头表示相对当前文件的路径，否则表示相对`require_path`的路径。会自动添加'.js'后缀。
+* 例如，`require_path`为`'module'`，则 `require('test')` 表示加载名为 `'module/test.js'` 的脚本。
 
 返回值即脚本的返回值（参考lua中的模块）。
 

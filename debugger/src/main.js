@@ -55,9 +55,11 @@ async function startDebug(id){
 
 let params = new URLSearchParams(location.search)
 let packageId = params.get('package')
-if(packageId && packageId!='debugger'){
+
+if(packageId && !globalThis.DEBUGGING){
+	globalThis.DEBUGGING = true
 	startDebug(packageId)//.catch(alert)
 }else{
-	let ui =require('ui')
+	let ui = require('ui')
 	store.keys().then(ui.showProjects)
 }
