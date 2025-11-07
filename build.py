@@ -18,10 +18,9 @@ default_preloads = {
     '.bmp': 'bitmap'
 }
 def build(dirpath, id, name, version=None, author=None, desc=None,
-    scripts_path='scripts/', main='scripts/main.js', overrideType={}, preloads={},
-    outputpath='test.bin', icon=None):
+    scripts_path='src/', main='src/main.js', overrideType={}, preloads={},
+    outputpath='test.spa', icon=None):
     '''
-    以 scripts_path 为前缀的文件被视作脚本
     icon 指明 dataurl 或 文件名
     '''
     filelist = []
@@ -80,7 +79,7 @@ try:
     config_file = open(os.path.join(dirpath, config_name), encoding='utf8')
     config = json.load(config_file)
     if 'outputpath' not in config:
-        config['outputpath'] = config['id']+'.bin'
+        config['outputpath'] = config['id']+'.spa'
     #print(config)
     build(dirpath, **config)
 except Exception as e:
