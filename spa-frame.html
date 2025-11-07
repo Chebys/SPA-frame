@@ -137,7 +137,7 @@
 
 const VERSION_TAG = '0.4'
 const API_VERSION = 0
-const DEFAULT_PACKAGE_URL = 'http://localhost/data/spa/%s.spa'
+const DEFAULT_PACKAGE_URL = 'https://chebys.pages.dev/data/spa/%s.spa'
 const SPA_EXT = '.spa'
 
 async function split(blob){
@@ -642,6 +642,7 @@ async function init(){
 }
 function getAutoRun(packages){
 	var autoRun = InitParams.get('fetch') || InitParams.get('auto_run') || localStorage.getItem('spa-auto-run')
+	//todo: 对于fetch可能需要检查新版本
 	for(let [id, meta] of packages){
 		if(id==autoRun)return id
 	}
