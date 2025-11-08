@@ -335,7 +335,7 @@ function fetchApp({id, url}){
         style: {
             width: '0%',
             height: '100%',
-            backgroundColor: '#2196F3',
+            background: 'linear-gradient(90deg, #3498db, #9b59b6)',
             transition: 'width 0.3s ease'
         }
     })
@@ -370,7 +370,7 @@ function fetchApp({id, url}){
 			progressBar.style.width = percentage + '%'
 		} else {
 			// 如果没有总大小信息，显示脉冲动画
-			progressBar.style.width = '50%'
+			progressBar.style.width = '100%'
 			progressBar.style.backgroundColor = '#2196F3'
 			progressBar.style.animation = 'pulse 1.5s infinite'
 		}
@@ -378,7 +378,8 @@ function fetchApp({id, url}){
 	}
 	function onError(err){
 		console.error(err)
-		alert('获取软件包失败：'+err)
+		progressText.style.color = 'red'
+		progressText.textContent = '获取软件包失败，详见控制台'
 	}
     XHRPromise(url, {onProgress}).then(async res=>{
 		if(!res.ok)
