@@ -1,4 +1,4 @@
-let store = new IDBStorage('SPA-frame', 'debugger')
+let store = require(':storage')
 
 async function startDebug(id){
 	let {$n, runApp, loadBlob} = require(':spa')

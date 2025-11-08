@@ -17,7 +17,7 @@ default_preloads = {
     '.json': 'json',
     '.bmp': 'bitmap'
 }
-def build(dirpath, id, name, version=None, author=None, desc=None,
+def build(dirpath, id, _ver, name, version=None, author=None, desc=None,
     scripts_path='src/', main='src/main.js', overrideType={}, preloads={},
     outputpath='test.spa', icon=None):
     '''
@@ -54,6 +54,7 @@ def build(dirpath, id, name, version=None, author=None, desc=None,
         files.append(file)
     meta = {
         'id': id,
+        '_ver': _ver,
         'name': name,
         'version': version,
         'author': author,

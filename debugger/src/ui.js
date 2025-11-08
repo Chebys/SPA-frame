@@ -3,7 +3,7 @@ function reloadAndDebug(id){
 }
 
 let { $n } = require(':spa')
-let store = new IDBStorage('SPA-frame', 'debugger')
+let store = require(':storage')
 let projectList
 
 // 更新样式定义
