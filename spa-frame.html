@@ -540,6 +540,11 @@ async function init(){
 		return
 	}
 
+	document.body.append(MainContainer())
+	displayList(packages)
+	setOnDropFile(document.body, loadApp)
+}
+function MainContainer(){ // 控制面板容器
 	var cardStyle = { //右侧卡片
 		background:'#fff',
 		padding:'16px',
@@ -547,8 +552,7 @@ async function init(){
 		boxShadow:'0 6px 18px rgba(22,28,37,0.06)',
 		marginBottom: '12px'
 	}
-	// 控制面板容器
-	var container = $n('div', {
+	return $n('div', {
 		style: {
 			width: '100%',
 			boxSizing: 'border-box',
@@ -685,10 +689,6 @@ async function init(){
 			})
 		]
 	})
-	
-	document.body.append(container)
-	displayList(packages)
-	setOnDropFile(document.body, loadApp)
 }
 function getAutoRun(packages){
 	var autoRun = InitParams.get('fetch') || InitParams.get('auto_run') || localStorage.getItem('spa-auto-run')
