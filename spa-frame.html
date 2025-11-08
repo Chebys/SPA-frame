@@ -158,12 +158,12 @@ async function split(blob){
 		}
 		throw new Error("no '\\0' found")
 	}
-    let pos = await findNUL()
-    let str = await blob.slice(0, pos).text()
-    return {
-        meta: JSON.parse(str),
-        blob: blob.slice(pos+1)
-    }
+	let pos = await findNUL()
+	let str = await blob.slice(0, pos).text()
+	return {
+		meta: JSON.parse(str),
+		blob: blob.slice(pos+1)
+	}
 }
 function FileInput(accept){
 	var input = document.createElement('input');
@@ -319,39 +319,39 @@ async function loadApp(file, addPackage=false){
 function fetchApp({id, url}){
 	document.body.style.textAlign = 'center'
 	applyCSS(`
-        @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
-        }
-    `)
+		@keyframes pulse {
+			0% { opacity: 0.6; }
+			50% { opacity: 1; }
+			100% { opacity: 0.6; }
+		}
+	`)
 	
 	let title = $n('h3', {content:'正在远程加载应用'})
 	let progressText = $n('span', {content:'正在连接'})
 	let progressLabel = $n('div', {content:['当前进度：', progressText]})
-    
-    // 创建进度条容器和进度条元素
-    let progressBar = $n('div', {
-        style: {
-            width: '0%',
-            height: '100%',
-            background: 'linear-gradient(90deg, #3498db, #9b59b6)',
-            transition: 'width 0.3s ease'
-        }
-    })
-    let progressBarContainer = $n('div', {
-        style: {
-            width: '80%',
-            height: '20px',
-            backgroundColor: '#f0f0f0',
-            borderRadius: '10px',
-            margin: '10px auto',
-            overflow: 'hidden'
-        },
+	
+	// 创建进度条容器和进度条元素
+	let progressBar = $n('div', {
+		style: {
+			width: '0%',
+			height: '100%',
+			background: 'linear-gradient(90deg, #3498db, #9b59b6)',
+			transition: 'width 0.3s ease'
+		}
+	})
+	let progressBarContainer = $n('div', {
+		style: {
+			width: '80%',
+			height: '20px',
+			backgroundColor: '#f0f0f0',
+			borderRadius: '10px',
+			margin: '10px auto',
+			overflow: 'hidden'
+		},
 		content: [progressBar]
-    })
-    
-    let urlLabel = $n('div', {content:['url: ', $n('a', {content:url, href:url})]})
+	})
+	
+	let urlLabel = $n('div', {content:['url: ', $n('a', {content:url, href:url})]})
 	let cancelBtn = $n('button', {
 		content: '取消',
 		style: btnStyle,
@@ -359,9 +359,9 @@ function fetchApp({id, url}){
 			location.search = ''
 		}
 	})
-    
-    document.body.append(title, progressLabel, progressBarContainer, urlLabel, cancelBtn)
-    
+	
+	document.body.append(title, progressLabel, progressBarContainer, urlLabel, cancelBtn)
+	
 	function onProgress({loaded, total}){
 		let text = getSizeText(loaded)
 		if(total) {
@@ -381,7 +381,7 @@ function fetchApp({id, url}){
 		progressText.style.color = 'red'
 		progressText.textContent = '获取软件包失败，详见控制台'
 	}
-    XHRPromise(url, {onProgress}).then(async res=>{
+	XHRPromise(url, {onProgress}).then(async res=>{
 		if(!res.ok)
 			return onError(res.status)
 		let blob = await res.blob()
@@ -446,7 +446,7 @@ function runApp(app){
 		let keys = []
 		for(let k of await store.keys())
 			if(k.startsWith(prefix))
-				keys.push(k.slice(prefix.length))
+				keys.push(k)
 		return keys
 	}
 	modules[':storage'] = {
@@ -456,11 +456,14 @@ function runApp(app){
 		setMany(entries){ return store.setMany(entries.map(kv=>[prefix+kv[0], kv[1]])) },
 		del(key){ return store.del(prefix+key) },
 		delMany(keys){ return store.delMany(keys.map(k=>prefix+k)) },
-		keys: _keys,
+		async keys(){
+			let keys = await _keys()
+			return keys.map(k=>k.slice(prefix.length))
+		},
 		async entries(){
 			let keys = await _keys()
 			let values = await store.getMany(keys)
-			return keys.map((key, i)=>[key, values[i]])
+			return keys.map((k, i)=>[k.slice(prefix.length), values[i]])
 		}
 	}
 	
