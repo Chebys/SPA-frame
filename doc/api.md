@@ -80,3 +80,5 @@ await storage.keys()
 await storage.entries()
 ```
 目前只能使用字符串作为键。非字符串键会自动转换为字符串。
+
+值可以是任何支持[结构化克隆](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Workers_API/Structured_clone_algorithm)的数据类型。
