@@ -255,15 +255,6 @@ function showConfigScreen(container){
     let dirHandle = null
     let idInput, dirText, mainInput, requireInput, preloadsInput
     
-    // 表单字段容器
-    let formContainer = $n('div', {
-        style: {
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px'
-        }
-    })
-    
     // 目录选择区域
     let dirSelector = $n('div', {
         style: {
@@ -312,6 +303,38 @@ function showConfigScreen(container){
             })
         ]
     })
+    
+    // 表单字段容器
+    let formContainer = $n('div', {
+        style: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px'
+        }
+    })
+	
+	//todo: 
+	let btn = $n('button', {
+		content: '从 build-config.json 读取配置',
+		async onclick(){
+			try{
+				if(!dirHandle)
+					throw new Error('未选择目录')
+				let config = await loadJSON(dirHandle, 'build-config.json')
+				mainInput.value = config.main
+                requireInput.value = config.require_path
+                //if(config.preloads)preloadsInput.value = JSON.stringify(config.preloads) 格式？
+			}catch(err){
+				if(err.name == 'NotFoundError')
+					alert('文件不存在')
+				else if(err.name == 'SyntaxError')
+					alert('文件不合法')
+				else
+					alert(err)
+				console.error(err)
+			}
+		}
+	})
     
     // 表单字段
     let formFields = [

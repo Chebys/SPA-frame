@@ -30,9 +30,8 @@ async function startDebug(id){
 	document.body.textContent = '正在加载……'
 	let assets = Object.create(null),
 		scripts = Object.create(null)
-	for await(let [name, h] of fs.scanFiles(hd)){
-		let file = await h.getFile(),
-			ext = fs.ext(name),
+	for await(let [name, file] of fs.scanFiles(hd)){
+		let ext = fs.ext(name),
 			isScript = ext=='.js'
 		if(isScript){
 			scripts[name] = await file.text()

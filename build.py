@@ -17,9 +17,9 @@ default_preloads = {
     '.json': 'json',
     '.bmp': 'bitmap'
 }
-def build(dirpath, id, _ver, name, version=None, author=None, desc=None,
-    scripts_path='src/', main='src/main.js', overrideType={}, preloads={},
-    outputpath='test.spa', icon=None):
+def build(dirpath, id, _ver, name, version=None, icon=None, author=None, desc=None,
+    require_path=None, scripts_path='src/', main='src/main.js', overrideType={}, preloads=default_preloads,
+    outputpath='test.spa'):
     '''
     icon 指明 dataurl 或 文件名
     '''
@@ -48,8 +48,8 @@ def build(dirpath, id, _ver, name, version=None, author=None, desc=None,
         _, ext = os.path.splitext(fname)
         if fname in preloads:
             filemeta['preload'] = preloads[fname]
-        elif ext in default_preloads:
-            filemeta['preload'] = default_preloads[ext]
+        elif ext in preloads:
+            filemeta['preload'] = preloads[ext]
         filelist.append(filemeta)
         files.append(file)
     meta = {
@@ -60,7 +60,7 @@ def build(dirpath, id, _ver, name, version=None, author=None, desc=None,
         'author': author,
         'desc': desc,
         'files': filelist,
-        'require_path': scripts_path[:-1],
+        'require_path': require_path or scripts_path[:-1],
         'main': main
     }
     if icon_url:
