@@ -3,10 +3,10 @@ function reloadAndDebug(id){
 }
 
 let { $n } = require(':spa')
+let fs = require('fs')
 let store = require(':storage')
 let projectList
 
-// 更新样式定义
 let ctnStyle = {
     padding: '20px',
     border: '1px solid #e1e5e9',
@@ -24,38 +24,10 @@ let sectionTitleStyle = {
     borderBottom: '2px solid #f1f5f9'
 }
 
-let buttonStyle = {
-    padding: '6px 12px',
-    border: 'none',
-    borderRadius: '5px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    fontSize: '0.9rem'
-}
-
-let primaryButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: '#4361ee',
-    color: 'white'
-}
-
-let secondaryButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: '#6c757d',
-    color: 'white'
-}
-
-let dangerButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: '#f72585',
-    color: 'white'
-}
-
 let inputStyle = {
-    padding: '12px 15px',
+    padding: '6px 10px',
     border: '1px solid #d1d5db',
-    borderRadius: '8px',
+    borderRadius: '6px',
     fontSize: '0.95rem',
     width: '100%',
     boxSizing: 'border-box'
@@ -78,6 +50,7 @@ function showProjects(list){
     })
     
     projectList = $n('div', {
+		className: 'projects',
 		style: {
 			flex: 1,
 			overflowY: 'auto'
@@ -112,7 +85,11 @@ function showProjects(list){
     })
     
     let newCtn = $n('div', {
-        style: ctnStyle,
+        style: {
+			...ctnStyle,
+			width: '300px',
+			overflowY: 'auto' //todo: header 不应该滚动
+		},
         content: [newProjectHeader]
     })
     
@@ -166,25 +143,7 @@ function refreshList(list){
     
     for(let id of list){
         let li = $n('div', {
-            style: {
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '8px 12px',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                marginBottom: '12px',
-                backgroundColor: '#f8fafc',
-                transition: 'all 0.2s ease'
-            },
-            onmouseover(){
-                this.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'
-                this.style.transform = 'translateY(-1px)'
-            },
-            onmouseout(){
-                this.style.boxShadow = 'none'
-                this.style.transform = 'translateY(0)'
-            },
+			className: 'entry',
             content: [
 				$n('div', {
 					content: id,
@@ -201,26 +160,14 @@ function refreshList(list){
                     },
                     content: [
                         $n('button', {
-                            style: primaryButtonStyle,
-                            onmouseover(){
-                                this.style.backgroundColor = '#3a56d4'
-                            },
-                            onmouseout(){
-                                this.style.backgroundColor = '#4361ee'
-                            },
+							className: 'primary',
                             content: '开始调试',
                             onclick(){
                                 reloadAndDebug(id)
                             }
                         }),
                         $n('button', {
-                            style: dangerButtonStyle,
-                            onmouseover(){
-                                this.style.backgroundColor = '#e01a6f'
-                            },
-                            onmouseout(){
-                                this.style.backgroundColor = '#f72585'
-                            },
+							className: 'danger',
                             content: '移除项目',
                             onclick(){
                                 if(confirm(`确定要移除项目 "${id}" 吗？`)) {
@@ -253,45 +200,35 @@ let defaultPreloads = `{
 
 function showConfigScreen(container){
     let dirHandle = null
-    let idInput, dirText, mainInput, requireInput, preloadsInput
+    let idInput, dirText, mainInput, requireInput, overrideInput, preloadsInput
     
     // 目录选择区域
     let dirSelector = $n('div', {
         style: {
             display: 'flex',
             alignItems: 'center',
-            gap: '15px',
-            padding: '15px',
+            gap: '10px',
+            padding: '10px',
             backgroundColor: '#f8fafc',
             borderRadius: '8px',
             border: '1px dashed #cbd5e1'
         },
         content: [
             $n('button', {
+				className: 'primary',
                 style: {
-                    ...primaryButtonStyle,
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px'
-                },
-                onmouseover(){
-                    this.style.backgroundColor = '#3a56d4'
-                },
-                onmouseout(){
-                    this.style.backgroundColor = '#4361ee'
                 },
                 content: [
                     $n('span', {content: '📁'}),
                     new Text('选择项目目录')
                 ],
                 async onclick(){
-                    try {
-                        dirHandle = await showDirectoryPicker()
-                        idInput.value = dirText.textContent = dirHandle.name
-                        dirText.style.color = '#059669'
-                    } catch(err) {
-                        console.log('目录选择取消或出错:', err)
-                    }
+					dirHandle = await showDirectoryPicker()
+					idInput.value = dirText.textContent = dirHandle.name
+					dirText.style.color = '#059669'
                 }
             }),
             dirText = $n('span', {
@@ -305,37 +242,14 @@ function showConfigScreen(container){
     })
     
     // 表单字段容器
-    let formContainer = $n('div', {
+    let formCtn = $n('div', {
         style: {
             display: 'flex',
             flexDirection: 'column',
             gap: '20px'
         }
     })
-	
-	//todo: 
-	let btn = $n('button', {
-		content: '从 build-config.json 读取配置',
-		async onclick(){
-			try{
-				if(!dirHandle)
-					throw new Error('未选择目录')
-				let config = await loadJSON(dirHandle, 'build-config.json')
-				mainInput.value = config.main
-                requireInput.value = config.require_path
-                //if(config.preloads)preloadsInput.value = JSON.stringify(config.preloads) 格式？
-			}catch(err){
-				if(err.name == 'NotFoundError')
-					alert('文件不存在')
-				else if(err.name == 'SyntaxError')
-					alert('文件不合法')
-				else
-					alert(err)
-				console.error(err)
-			}
-		}
-	})
-    
+
     // 表单字段
     let formFields = [
         {label: '项目ID', input: idInput = $n('input', {style: inputStyle}), required: true},
@@ -345,7 +259,7 @@ function showConfigScreen(container){
     
     // 创建表单字段
     formFields.forEach(field => {
-        let fieldContainer = $n('div', {
+        let fieldCtn = $n('div', {
             content: [
                 $n('label', {
                     style: {
@@ -359,11 +273,43 @@ function showConfigScreen(container){
                 field.input
             ]
         })
-        formContainer.append(fieldContainer)
+        formCtn.append(fieldCtn)
     })
     
+	let overrideCtn = $n('div', {
+		content: [
+			$n('label', {
+                style: {
+                    display: 'block',
+                    marginBottom: '8px',
+                    fontWeight: '600',
+                    color: '#374151'
+                },
+                content: '类型覆盖'
+            }),
+            $n('div', {
+                style: {
+                    fontSize: '0.85rem',
+                    color: '#6b7280',
+                    marginBottom: '8px'
+                },
+                content: '指定文件名到类型的映射。若未指定则根据扩展名判断。'
+            }),
+            overrideInput = $n('textarea', {
+                style: {
+                    ...inputStyle,
+                    fontFamily: 'monospace',
+                    fontSize: '0.9rem',
+					resize: 'vertical'
+                },
+                value: '{}'
+            })
+		]
+	})
+	formCtn.append(overrideCtn)
+	
     // 预加载规则区域
-    let preloadsContainer = $n('div', {
+    let preloadsCtn = $n('div', {
         content: [
             $n('label', {
                 style: {
@@ -380,36 +326,57 @@ function showConfigScreen(container){
                     color: '#6b7280',
                     marginBottom: '8px'
                 },
-                content: '指定文件扩展名和对应的加载类型'
+                content: '指定文件名/扩展名到预加载类型的映射。'
             }),
             preloadsInput = $n('textarea', {
                 style: {
                     ...inputStyle,
-                    minHeight: '120px',
+                    minHeight: '100px',
                     fontFamily: 'monospace',
-                    fontSize: '0.9rem'
+                    fontSize: '0.9rem',
+					resize: 'vertical'
                 },
                 value: defaultPreloads
             })
         ]
     })
-    formContainer.append(preloadsContainer)
+    formCtn.append(preloadsCtn)
+    
+	let autofillBtn = $n('button', {
+		content: '从 build-config.json 读取配置',
+		async onclick(){
+			try{
+				if(!dirHandle)
+					throw new Error('未选择目录')
+				let config = await fs.loadJSON(dirHandle, 'build-config.json')
+				if('main' in config)
+					mainInput.value = config.main
+                if('require_path' in config)
+					requireInput.value = config.require_path
+				if(config.overrideType)
+					overrideInput.value = JSON.stringify(config.overrideType)
+                if(config.preloads)
+					preloadsInput.value = JSON.stringify(config.preloads)
+			}catch(err){
+				if(err.name == 'NotFoundError')
+					alert('文件不存在')
+				else if(err.name == 'SyntaxError')
+					alert('文件不合法')
+				else
+					alert(err)
+				console.error(err)
+			}
+		}
+	})
     
     // 提交按钮
     let submitButton = $n('button', {
+		className: 'primary',
         style: {
-            ...primaryButtonStyle,
+			display: 'block',
             padding: '12px 30px',
             fontSize: '1rem',
             marginTop: '10px'
-        },
-        onmouseover(){
-            this.style.backgroundColor = '#3a56d4'
-            this.style.transform = 'translateY(-2px)'
-        },
-        onmouseout(){
-            this.style.backgroundColor = '#4361ee'
-            this.style.transform = 'translateY(0)'
         },
         content: '添加并调试项目',
         async onclick(){
@@ -425,6 +392,7 @@ function showConfigScreen(container){
                     directory: dirHandle,
                     main: mainInput.value,
                     require_path: requireInput.value,
+					overrideType: JSON.parse(overrideInput.value),
                     preloads: JSON.parse(preloadsInput.value)
                 }
                 
@@ -435,12 +403,53 @@ function showConfigScreen(container){
             }
         }
     })
-    
+    	
     container.append(
         dirSelector,
-        formContainer,
+        formCtn,
+		autofillBtn,
         submitButton
     )
 }
+
+applyCSS(`
+.projects .entry{
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 8px 12px;
+	border: 1px solid #e2e8f0;
+	border-radius: 8px;
+	margin-bottom: 12px;
+	background-color: #f8fafc;
+	transition: all 0.2s ease;
+	&:hover{
+		box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+		transform: translateY(-1px);
+	}
+}
+button{
+	padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+	--hover-bgcolor: #ddd;
+	&.primary{
+		background-color: #4361ee;
+		--hover-bgcolor: #3a56d4;
+		color: white;
+	}
+	&.danger{
+		background-color: #f72585;
+		--hover-bgcolor: #e01a6f;
+		color: white;
+	}
+	&:hover{
+		background-color: var(--hover-bgcolor);
+	}
+}
+`)
 
 return {showProjects}

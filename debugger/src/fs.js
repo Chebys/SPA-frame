@@ -12,7 +12,7 @@ async function getFile(dir, path){
 	let h = await dir.getFileHandle(parts[0])
 	return h.getFile()
 }
-async loadJSON(dir, path){
+async function loadJSON(dir, path){
 	let file = await getFile(dir, path)
 	let str = await file.text()
 	return JSON.parse(str)

@@ -148,12 +148,12 @@ const SMALL_SCREEN_QRY = matchMedia('(max-width: 720px)')
 
 async function split(blob){
 	async function findNUL(){
-		let bfr_size = 256*1024 //每次读取 256KB
+		let buf_size = 256*1024 //每次读取 256KB
 		let start = 0
 		while(start < blob.size){
-			let end = start+bfr_size
-			let bfr = await blob.slice(start, end).arrayBuffer()
-			let pos = new Uint8Array(bfr).indexOf(0)
+			let end = start+buf_size
+			let buf = await blob.slice(start, end).arrayBuffer()
+			let pos = new Uint8Array(buf).indexOf(0)
 			if(pos >= 0)
 				return start+pos
 			start = end
@@ -626,7 +626,7 @@ function MainContainer(){ // 控制面板容器
 						flex: '0 0 auto'
 					},
 					content: [
-						$n('div', { content: '版本 v'+VERSION_TAG, style: { fontWeight: '700', color: '#0f172a' } }),
+						$n('div', { content: '版本 '+VERSION_TAG, style: { fontWeight: '700', color: '#0f172a' } }),
 						$n('a', {
 							content: 'GitHub 仓库',
 							href: 'https://github.com/Chebys/SPA-frame',
@@ -700,7 +700,7 @@ function MainContainer(){ // 控制面板容器
 			})
 		]
 	})
-	return $n('div', { className: 'main-ctn', content: [topBar, body] })
+	return $n('div', { id: 'main-ctn', content: [topBar, body] })
 }
 function getAutoRun(packages){
 	var autoRun = InitParams.get('fetch') || InitParams.get('auto_run') || localStorage.getItem('spa-auto-run')
@@ -922,11 +922,11 @@ body{
 	-webkit-font-smoothing:antialiased;
 	-moz-osx-font-smoothing:grayscale;
 }
-.main-ctn{
+#main-ctn{
 	margin: 0 auto;
 	width: 100%;
 	box-sizing: border-box;
-	padding: 28px;
+	padding: 15px 28px;
 	max-width: 980px;
 }
 .package-item{
@@ -959,10 +959,9 @@ button:hover{
 	flex-direction: column;
 }
 @media ${SMALL_SCREEN_QRY.media}{
-	/* 在窄屏上让容器更紧凑 */
 	:root{ --card-padding: 12px; }
 	.header-title{ display: none; }
-	.main-ctn{ padding: 10px; }
+	#main-ctn{ padding: 10px; }
 	.right-ctn{ display: none; }
 }
 `)
