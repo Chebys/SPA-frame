@@ -432,7 +432,8 @@ function runApp(app){
 			throw new Error('module not found: '+name)
 		
 		running_modules[name] = true
-		let res = Function('require', '"use strict";'+script)(makeRequire(name))
+		script = `//${name}\n"use strict";\n${script}`
+		let res = Function('require', script)(makeRequire(name))
 		delete running_modules[name]
 		modules[name] = res
 		return res

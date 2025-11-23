@@ -1,281 +1,519 @@
-let Game2048 = require('game')
-let AnimController = require('anim')
 
-class GameController {
-    constructor() {
-        this.game = new Game2048();
-        this.gameBoard = document.getElementById('game-board');
-        this.scoreElement = document.getElementById('score');
-        this.highScoreElement = document.getElementById('high-score');
-        this.gameOverElement = document.getElementById('game-over');
-        this.gameWinElement = document.getElementById('game-win');
-        this.finalScoreElement = document.getElementById('final-score');
-		this.anim = new AnimController(this.gameBoard, 100 / this.game.size);
-        
-        // 按钮
-        this.newGameButton = document.getElementById('new-game');
-        this.restartButton = document.getElementById('restart');
-        this.continueButton = document.getElementById('continue');
-        this.newWinGameButton = document.getElementById('new-win-game');
-        
-        // 初始化游戏界面
-        this.initializeBoard();
-        this.updateScore();
-        this.setupEventListeners();
-        
-        // 绘制初始方块
-        this.drawInitialTiles();
-    }
-    
-    // 初始化游戏板
-    initializeBoard() {
-        // 清空游戏板
-        this.gameBoard.innerHTML = '';
-        
-        // 创建网格单元格
-        for (let y = 0; y < this.game.size; y++) {
-            for (let x = 0; x < this.game.size; x++) {
-                const cell = document.createElement('div');
-                cell.classList.add('cell');
-                cell.dataset.x = x;
-                cell.dataset.y = y;
-                this.gameBoard.appendChild(cell);
-            }
-        }
-    }
-    
-    // 绘制初始方块
-    drawInitialTiles() {
-        const { newTiles } = this.game.lastMoveInfo;
-        newTiles.forEach(tile => {
-            this.anim.newTile(tile.x, tile.y, tile.value);
-        });
-    }
-    
-    // 绘制当前状态的方块（无动画）
-    drawTiles() {
-        // 先移除所有现有的方块
-        const existingTiles = document.querySelectorAll('.tile');
-        existingTiles.forEach(tile => tile.remove());
-        
-        // 绘制所有方块
-        for (let y = 0; y < this.game.size; y++) {
-            for (let x = 0; x < this.game.size; x++) {
-                const value = this.game.grid[y][x];
-                if (value) {
-                    this.createStaticTile(x, y, value);
-                }
-            }
-        }
-    }
-    
-    // 创建静态方块（无动画）
-    createStaticTile(x, y, value) {
-        const cellSize = 100 / this.game.size;
-        const tile = document.createElement('div');
-        tile.classList.add('tile', `tile-${value}`);
-        tile.textContent = value;
-        tile.dataset.x = x;
-        tile.dataset.y = y;
-        tile.style.width = `${cellSize}%`;
-        tile.style.height = `${cellSize}%`;
-        tile.style.left = `${x * cellSize}%`;
-        tile.style.top = `${y * cellSize}%`;
-        
-        this.gameBoard.appendChild(tile);
-        return tile;
-    }
-    
-    // 更新分数显示
-    updateScore() {
-        this.scoreElement.textContent = this.game.score;
-        this.highScoreElement.textContent = this.game.highScore;
-        this.finalScoreElement.textContent = this.game.score;
-    }
-    
-    // 处理移动并添加动画效果
-    async handleMove(direction) {
-        if (this.game.gameOver || (this.game.won && !this.game.keepPlaying)) {
-            return;
-        }
-        
-        const previousScore = this.game.score;
-        
-        // 执行移动并获取移动信息
-        let moveInfo;
-        switch (direction) {
-            case 'left':
-                moveInfo = this.game.moveLeft();
-                break;
-            case 'right':
-                moveInfo = this.game.moveRight();
-                break;
-            case 'up':
-                moveInfo = this.game.moveUp();
-                break;
-            case 'down':
-                moveInfo = this.game.moveDown();
-                break;
-        }
-        //console.log(moveInfo)
-        const { moved, movedTiles, mergedTiles, newTiles, scoreAdded } = moveInfo;
-        
-        // 如果有移动，执行动画
-        if (moved) {
-            // 先移除现有方块（保留用于动画的临时方块）
-            const existingTiles = document.querySelectorAll('.tile');
-            existingTiles.forEach(tile => tile.remove());
-            
-            // 执行移动和合并动画
-            await this.anim.move(movedTiles, mergedTiles);
-			this.drawTiles();
-            
-            // 添加新方块并执行出现动画
-            if (newTiles.length > 0) {
-                for (const tile of newTiles) {
-                    await this.anim.newTile(tile.x, tile.y, tile.value);
-                }
-            }
-            
-            // 更新分数并添加分数动画
-            if (scoreAdded > 0) {
-                this.animateScoreChange(previousScore, this.game.score);
-            } else {
-                this.updateScore();
-            }
-            
-            // 检查游戏状态
-            if (this.game.checkWin()) {
-                this.gameWinElement.style.display = 'flex';
-            } else if (this.game.checkGameOver()) {
-                this.gameOverElement.style.display = 'flex';
-            }
-        }
-    }
-    
-    // 分数变化动画
-    animateScoreChange(from, to) {
-        let current = from;
-        const increment = Math.ceil((to - from) / 20); // 分20步完成动画
-        const scoreElement = this.scoreElement;
-        
-        const updateScore = () => {
-            current += increment;
-            if ((increment > 0 && current >= to) || (increment < 0 && current <= to)) {
-                current = to;
-                scoreElement.textContent = current;
-                this.highScoreElement.textContent = this.game.highScore;
-                return;
-            }
-            
-            scoreElement.textContent = current;
-            requestAnimationFrame(() => {
-                setTimeout(updateScore, 15);
-            });
-        };
-        
-        updateScore();
-    }
-    
-    // 设置事件监听器
-    setupEventListeners() {
-        // 键盘控制
-        document.addEventListener('keydown', (event) => {
-            switch (event.key) {
-                case 'ArrowLeft':
-                    event.preventDefault();
-                    this.handleMove('left');
-                    break;
-                case 'ArrowRight':
-                    event.preventDefault();
-                    this.handleMove('right');
-                    break;
-                case 'ArrowUp':
-                    event.preventDefault();
-                    this.handleMove('up');
-                    break;
-                case 'ArrowDown':
-                    event.preventDefault();
-                    this.handleMove('down');
-                    break;
-            }
-        });
-        
-        // 触摸屏滑动控制
-        let touchStartX = 0;
-        let touchStartY = 0;
-        
-        document.addEventListener('touchstart', (event) => {
-            touchStartX = event.touches[0].clientX;
-            touchStartY = event.touches[0].clientY;
-        }, false);
-        
-        document.addEventListener('touchend', (event) => {
-            if (!touchStartX || !touchStartY) {
-                return;
-            }
-            
-            const touchEndX = event.changedTouches[0].clientX;
-            const touchEndY = event.changedTouches[0].clientY;
-            
-            const diffX = touchEndX - touchStartX;
-            const diffY = touchEndY - touchStartY;
-            
-            // 确定滑动方向（水平或垂直）
-            if (Math.abs(diffX) > Math.abs(diffY)) {
-                // 水平滑动
-                if (diffX > 0) {
-                    this.handleMove('right');
-                } else {
-                    this.handleMove('left');
-                }
-            } else {
-                // 垂直滑动
-                if (diffY > 0) {
-                    this.handleMove('down');
-                } else {
-                    this.handleMove('up');
-                }
-            }
-            
-            // 重置
-            touchStartX = 0;
-            touchStartY = 0;
-        }, false);
-        
-        // 按钮事件
-        this.newGameButton.addEventListener('click', () => this.resetGame());
-        this.restartButton.addEventListener('click', () => this.resetGame());
-        this.continueButton.addEventListener('click', () => {
-            this.game.keepPlaying = true;
-            this.gameWinElement.style.display = 'none';
-        });
-        this.newWinGameButton.addEventListener('click', () => this.resetGame());
-    }
-    
-    // 重置游戏
-    resetGame() {
-        const moveInfo = this.game.restart();
-        this.drawTiles();
-        this.updateScore();
-        this.gameOverElement.style.display = 'none';
-        this.gameWinElement.style.display = 'none';
-        
-        // 为新游戏的初始方块添加动画
-        setTimeout(() => {
-            const existingTiles = document.querySelectorAll('.tile');
-            existingTiles.forEach(tile => tile.remove());
-            moveInfo.newTiles.forEach(tile => {
-                this.anim.newTile(tile.x, tile.y, tile.value);
-            });
-        }, 50);
-    }
-}
-
-importFont('FontAwesome', Assets['fontawesome-webfont.ttf'])
+importFont('FontAwesome', 'fontawesome-webfont.ttf')
 applyCSS(Assets['font-awesome.min.css'])
 applyCSS(Assets['style.css'])
-document.body.innerHTML = Assets['body.xml']
 
-// 初始化游戏
-new GameController()
+require('ui')
+
+// Binary File Viewer - Main Application
+// DOM Elements
+const fileInput = document.getElementById('file-input');
+const fileName = document.getElementById('file-name');
+const fileInfo = document.getElementById('file-info');
+const infoFileName = document.getElementById('info-file-name');
+const infoFileSize = document.getElementById('info-file-size');
+const infoFileType = document.getElementById('info-file-type');
+const infoFileModified = document.getElementById('info-file-modified');
+const navControls = document.getElementById('nav-controls');
+const btnFirst = document.getElementById('btn-first');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+const btnLast = document.getElementById('btn-last');
+const pageInput = document.getElementById('page-input');
+const pageCount = document.getElementById('page-count');
+const bytesPerPage = document.getElementById('bytes-per-page');
+const offsetInput = document.getElementById('offset-input');
+const btnGo = document.getElementById('btn-go');
+const viewerContainer = document.getElementById('viewer-container');
+const offsetColumn = document.getElementById('offset-column');
+const hexColumn = document.getElementById('hex-column');
+const asciiColumn = document.getElementById('ascii-column');
+const noFileMessage = document.getElementById('no-file-message');
+const loadingIndicator = document.getElementById('loading-indicator');
+const statusMessage = document.getElementById('status-message');
+
+// Application State
+const appState = {
+	file: null,
+	fileData: null,
+	currentPage: 1,
+	bytesPerPage: 256,
+	bytesPerRow: 16,
+	fileSignatures: [
+	  { signature: [0x42, 0x4D], description: 'BMP Image' },
+	  { signature: [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A], description: 'PNG Image' },
+	  { signature: [0xFF, 0xD8, 0xFF], description: 'JPEG Image' },
+	  { signature: [0x25, 0x50, 0x44, 0x46], description: 'PDF Document' },
+	  { signature: [0x7F, 0x45, 0x4C, 0x46], description: 'ELF Executable' },
+	  { signature: [0x4D, 0x5A], description: 'Windows Executable' },
+	  { signature: [0x50, 0x4B, 0x03, 0x04], description: 'ZIP Archive' },
+	  { signature: [0x1F, 0x8B], description: 'GZIP Archive' },
+	  { signature: [0x49, 0x44, 0x33], description: 'MP3 Audio' },
+	  { signature: [0x00, 0x00, 0x01, 0xBA], description: 'MPEG Video' },
+	  { signature: [0x30, 0x26, 0xB2, 0x75, 0x8E, 0x66, 0xCF, 0x11], description: 'WMV Video' },
+	  { signature: [0x66, 0x74, 0x79, 0x70], description: 'MP4 Video' },
+	  { signature: [0x4F, 0x67, 0x67, 0x53], description: 'OGG Audio/Video' },
+	  { signature: [0x52, 0x49, 0x46, 0x46], description: 'RIFF Container' },
+	  { signature: [0x57, 0x41, 0x56, 0x45], description: 'WAV Audio' },
+	  { signature: [0x42, 0x5A, 0x68], description: 'BZIP2 Archive' },
+	  { signature: [0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C], description: '7Z Archive' },
+	  { signature: [0x4D, 0x53, 0x43, 0x46], description: 'CAB Archive' },
+	  { signature: [0x50, 0x4B, 0x05, 0x06], description: 'ZIP Archive (Empty)' },
+	  { signature: [0x50, 0x4B, 0x07, 0x08], description: 'ZIP Archive (Spanned)' },
+	]
+};
+
+// Initialize the application
+function init() {
+// Set up event listeners
+fileInput.addEventListener('change', handleFileSelect);
+btnFirst.addEventListener('click', goToFirstPage);
+btnPrev.addEventListener('click', goToPreviousPage);
+btnNext.addEventListener('click', goToNextPage);
+btnLast.addEventListener('click', goToLastPage);
+pageInput.addEventListener('change', handlePageChange);
+bytesPerPage.addEventListener('change', handleBytesPerPageChange);
+btnGo.addEventListener('click', handleGoToOffset);
+offsetInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') handleGoToOffset();
+});
+
+// Set initial state
+updateUI();
+}
+
+// Handle file selection
+function handleFileSelect(event) {
+	const file = event.target.files[0];
+	if (!file) return;
+
+	appState.file = file;
+	fileName.textContent = file.name;
+
+	// Show loading indicator
+	showLoading();
+
+	// Read file as ArrayBuffer
+	const reader = new FileReader();
+	reader.onload = function(e) {
+	  appState.fileData = new Uint8Array(e.target.result);
+	  appState.currentPage = 1;
+	  updateFileInfo();
+	  renderPage();
+	  updateUI();
+	  hideLoading();
+	  showStatus(`Successfully loaded ${formatFileSize(appState.fileData.length)}`);
+	};
+
+	reader.onerror = function() {
+	  hideLoading();
+	  showStatus('Error reading file', true);
+	  alert('Error reading file. Please try again.');
+	};
+
+	reader.readAsArrayBuffer(file);
+}
+
+// Update file information display
+function updateFileInfo() {
+if (!appState.file) return;
+
+infoFileName.textContent = appState.file.name;
+infoFileSize.textContent = formatFileSize(appState.file.size);
+infoFileType.textContent = detectFileType() || 'Unknown';
+infoFileModified.textContent = appState.file.lastModifiedDate.toLocaleString();
+}
+
+// Detect file type based on signature
+function detectFileType() {
+if (!appState.fileData || appState.fileData.length === 0) return null;
+
+for (const sig of appState.fileSignatures) {
+  const signatureLength = sig.signature.length;
+  if (appState.fileData.length >= signatureLength) {
+	let match = true;
+	for (let i = 0; i < signatureLength; i++) {
+	  if (appState.fileData[i] !== sig.signature[i]) {
+		match = false;
+		break;
+	  }
+	}
+	if (match) {
+	  return sig.description;
+	}
+  }
+}
+
+return null;
+}
+
+// Render the current page
+function renderPage() {
+if (!appState.fileData) return;
+
+const bytesPerPage = parseInt(appState.bytesPerPage);
+const startOffset = (appState.currentPage - 1) * bytesPerPage;
+const endOffset = Math.min(startOffset + bytesPerPage, appState.fileData.length);
+
+// Clear previous content
+offsetColumn.innerHTML = '';
+hexColumn.innerHTML = '';
+asciiColumn.innerHTML = '';
+
+// Create rows for each segment
+for (let offset = startOffset; offset < endOffset; offset += appState.bytesPerRow) {
+  const rowEnd = Math.min(offset + appState.bytesPerRow, endOffset);
+  
+  // Create offset cell
+  const offsetCell = document.createElement('div');
+  offsetCell.className = 'px-2 py-1 text-right text-gray-400 font-mono text-sm';
+  offsetCell.textContent = offset.toString(16).padStart(8, '0');
+  offsetCell.dataset.offset = offset;
+  offsetColumn.appendChild(offsetCell);
+  
+  // Create hex cell
+  const hexCell = document.createElement('div');
+  hexCell.className = 'px-2 py-1 font-mono text-sm';
+  hexCell.dataset.offset = offset;
+  
+  // Create ascii cell
+  const asciiCell = document.createElement('div');
+  asciiCell.className = 'px-2 py-1 font-mono text-sm';
+  asciiCell.dataset.offset = offset;
+  
+  // Fill hex and ascii content
+  let hexText = '';
+  let asciiText = '';
+  
+  for (let i = offset; i < rowEnd; i++) {
+	const byte = appState.fileData[i];
+	hexText += byte.toString(16).padStart(2, '0') + ' ';
+	
+	// Determine if byte is printable ASCII
+	const charCode = byte;
+	if (charCode >= 0x20 && charCode <= 0x7E) {
+	  asciiText += String.fromCharCode(charCode);
+	} else if (charCode === 0x00) {
+	  asciiText += '<span class="null-byte">.</span>';
+	} else {
+	  asciiText += '<span class="non-printable-char">.</span>';
+	}
+  }
+  
+  // Add spacing for alignment
+  const hexSpaces = (appState.bytesPerRow - (rowEnd - offset)) * 3;
+  hexText += ' '.repeat(hexSpaces);
+  
+  hexCell.textContent = hexText;
+  asciiCell.innerHTML = asciiText;
+  
+  // Add hover and click events
+  [offsetCell, hexCell, asciiCell].forEach(cell => {
+	cell.addEventListener('mouseenter', handleRowHover);
+	cell.addEventListener('mouseleave', handleRowLeave);
+	cell.addEventListener('click', handleRowClick);
+  });
+  
+  hexColumn.appendChild(hexCell);
+  asciiColumn.appendChild(asciiCell);
+}
+
+// Highlight file signature if it's on this page
+highlightFileSignature(startOffset, endOffset);
+}
+
+// Highlight file signature bytes
+function highlightFileSignature(startOffset, endOffset) {
+if (!appState.fileData || appState.fileData.length === 0) return;
+
+for (const sig of appState.fileSignatures) {
+  const signatureLength = sig.signature.length;
+  if (appState.fileData.length >= signatureLength) {
+	let match = true;
+	for (let i = 0; i < signatureLength; i++) {
+	  if (appState.fileData[i] !== sig.signature[i]) {
+		match = false;
+		break;
+	  }
+	}
+	
+	if (match && 0 >= startOffset && signatureLength <= endOffset) {
+	  // Highlight in hex column
+	  const hexCells = hexColumn.querySelectorAll('div');
+	  for (let i = 0; i < signatureLength; i++) {
+		const byteOffset = i;
+		const rowOffset = Math.floor(byteOffset / appState.bytesPerRow);
+		const colOffset = byteOffset % appState.bytesPerRow;
+		
+		if (rowOffset < hexCells.length) {
+		  const hexCell = hexCells[rowOffset];
+		  const text = hexCell.textContent;
+		  const startIndex = colOffset * 3;
+		  const endIndex = startIndex + 2;
+		  
+		  if (startIndex >= 0 && endIndex <= text.length) {
+			const newText = text.substring(0, startIndex) +
+			  `<span class="file-signature">${text.substring(startIndex, endIndex)}</span>` +
+			  text.substring(endIndex);
+			hexCell.innerHTML = newText;
+		  }
+		}
+	  }
+	  
+	  // Highlight in ascii column
+	  const asciiCells = asciiColumn.querySelectorAll('div');
+	  for (let i = 0; i < signatureLength; i++) {
+		const byteOffset = i;
+		const rowOffset = Math.floor(byteOffset / appState.bytesPerRow);
+		const colOffset = byteOffset % appState.bytesPerRow;
+		
+		if (rowOffset < asciiCells.length) {
+		  const asciiCell = asciiCells[rowOffset];
+		  const childNodes = asciiCell.childNodes;
+		  
+		  // Find the text node or span that contains the character
+		  let charNode = null;
+		  let charIndex = 0;
+		  
+		  for (const node of childNodes) {
+			if (node.nodeType === Node.TEXT_NODE) {
+			  const textLength = node.textContent.length;
+			  if (charIndex + textLength > colOffset) {
+				// Split the text node
+				const text = node.textContent;
+				const before = text.substring(0, colOffset - charIndex);
+				const char = text.substring(colOffset - charIndex, colOffset - charIndex + 1);
+				const after = text.substring(colOffset - charIndex + 1);
+				
+				// Replace the text node with new nodes
+				node.textContent = before;
+				
+				const span = document.createElement('span');
+				span.className = 'file-signature';
+				span.textContent = char;
+				
+				const afterNode = document.createTextNode(after);
+				
+				asciiCell.insertBefore(span, node.nextSibling);
+				asciiCell.insertBefore(afterNode, span.nextSibling);
+				
+				charNode = span;
+				break;
+			  }
+			  charIndex += textLength;
+			} else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SPAN') {
+			  if (charIndex === colOffset) {
+				node.classList.add('file-signature');
+				charNode = node;
+				break;
+			  }
+			  charIndex += 1;
+			}
+		  }
+		}
+	  }
+	  
+	  break; // Only highlight the first matching signature
+	}
+  }
+}
+}
+
+// Handle row hover event
+function handleRowHover(event) {
+const row = event.currentTarget;
+const offset = parseInt(row.dataset.offset);
+
+// Highlight corresponding rows in all columns
+const offsetRows = offsetColumn.querySelectorAll(`div[data-offset="${offset}"]`);
+const hexRows = hexColumn.querySelectorAll(`div[data-offset="${offset}"]`);
+const asciiRows = asciiColumn.querySelectorAll(`div[data-offset="${offset}"]`);
+
+offsetRows.forEach(r => r.classList.add('offset-highlight'));
+hexRows.forEach(r => r.classList.add('hex-highlight'));
+asciiRows.forEach(r => r.classList.add('ascii-highlight'));
+}
+
+// Handle row leave event
+function handleRowLeave(event) {
+const row = event.currentTarget;
+const offset = parseInt(row.dataset.offset);
+
+// Remove highlight from corresponding rows in all columns
+const offsetRows = offsetColumn.querySelectorAll(`div[data-offset="${offset}"]`);
+const hexRows = hexColumn.querySelectorAll(`div[data-offset="${offset}"]`);
+const asciiRows = asciiColumn.querySelectorAll(`div[data-offset="${offset}"]`);
+
+offsetRows.forEach(r => r.classList.remove('offset-highlight'));
+hexRows.forEach(r => r.classList.remove('hex-highlight'));
+asciiRows.forEach(r => r.classList.remove('ascii-highlight'));
+}
+
+// Handle row click event
+function handleRowClick(event) {
+const row = event.currentTarget;
+const offset = parseInt(row.dataset.offset);
+
+// Show offset in status
+showStatus(`Offset: 0x${offset.toString(16).padStart(8, '0')} (${offset})`);
+}
+
+// Navigation functions
+function goToFirstPage() {
+if (appState.currentPage !== 1) {
+  appState.currentPage = 1;
+  renderPage();
+  updateUI();
+}
+}
+
+function goToPreviousPage() {
+if (appState.currentPage > 1) {
+  appState.currentPage--;
+  renderPage();
+  updateUI();
+}
+}
+
+function goToNextPage() {
+const totalPages = getTotalPages();
+if (appState.currentPage < totalPages) {
+  appState.currentPage++;
+  renderPage();
+  updateUI();
+}
+}
+
+function goToLastPage() {
+const totalPages = getTotalPages();
+if (appState.currentPage !== totalPages) {
+  appState.currentPage = totalPages;
+  renderPage();
+  updateUI();
+}
+}
+
+function handlePageChange() {
+let page = parseInt(pageInput.value);
+const totalPages = getTotalPages();
+
+if (isNaN(page)) page = 1;
+if (page < 1) page = 1;
+if (page > totalPages) page = totalPages;
+
+appState.currentPage = page;
+renderPage();
+updateUI();
+}
+
+function handleBytesPerPageChange() {
+appState.bytesPerPage = parseInt(bytesPerPage.value);
+appState.currentPage = 1;
+renderPage();
+updateUI();
+}
+
+function handleGoToOffset() {
+const offsetStr = offsetInput.value.trim();
+let offset = 0;
+
+try {
+  // Try to parse as hexadecimal if starts with 0x
+  if (offsetStr.startsWith('0x')) {
+	offset = parseInt(offsetStr, 16);
+  } else {
+	offset = parseInt(offsetStr, 10);
+  }
+  
+  // Validate offset
+  if (isNaN(offset) || offset < 0 || offset >= appState.fileData.length) {
+	throw new Error('Invalid offset');
+  }
+  
+  // Calculate which page this offset is on
+  const bytesPerPage = parseInt(appState.bytesPerPage);
+  appState.currentPage = Math.floor(offset / bytesPerPage) + 1;
+  
+  renderPage();
+  updateUI();
+  showStatus(`Jumped to offset: 0x${offset.toString(16).padStart(8, '0')} (${offset})`);
+} catch (error) {
+  showStatus('Invalid offset format', true);
+  alert('Invalid offset. Please enter a valid number (decimal or hexadecimal starting with 0x).');
+}
+}
+
+// Helper functions
+function getTotalPages() {
+if (!appState.fileData) return 0;
+const bytesPerPage = parseInt(appState.bytesPerPage);
+return Math.ceil(appState.fileData.length / bytesPerPage);
+}
+
+function formatFileSize(bytes) {
+if (bytes === 0) return '0 Bytes';
+
+const k = 1024;
+const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// UI Update functions
+function updateUI() {
+const hasFile = !!appState.file;
+const hasData = !!appState.fileData;
+
+// Show/hide elements based on state
+fileInfo.classList.toggle('hidden', !hasFile);
+navControls.classList.toggle('hidden', !hasData);
+viewerContainer.classList.toggle('hidden', !hasData);
+noFileMessage.classList.toggle('hidden', hasData);
+
+// Update page controls
+if (hasData) {
+  const totalPages = getTotalPages();
+  pageInput.value = appState.currentPage;
+  pageCount.textContent = `of ${totalPages}`;
+  
+  // Enable/disable navigation buttons
+  btnFirst.disabled = appState.currentPage === 1;
+  btnPrev.disabled = appState.currentPage === 1;
+  btnNext.disabled = appState.currentPage === totalPages;
+  btnLast.disabled = appState.currentPage === totalPages;
+  
+  btnFirst.classList.toggle('opacity-50', appState.currentPage === 1);
+  btnPrev.classList.toggle('opacity-50', appState.currentPage === 1);
+  btnNext.classList.toggle('opacity-50', appState.currentPage === totalPages);
+  btnLast.classList.toggle('opacity-50', appState.currentPage === totalPages);
+}
+}
+
+function showLoading() {
+loadingIndicator.classList.remove('hidden');
+noFileMessage.classList.add('hidden');
+viewerContainer.classList.add('hidden');
+}
+
+function hideLoading() {
+loadingIndicator.classList.add('hidden');
+}
+
+function showStatus(message, isError = false) {
+statusMessage.textContent = message;
+statusMessage.className = isError ? 'text-danger' : 'text-gray-400';
+
+// Reset status after 5 seconds
+if (appState.statusTimeout) {
+  clearTimeout(appState.statusTimeout);
+}
+
+appState.statusTimeout = setTimeout(() => {
+  statusMessage.textContent = 'Ready';
+  statusMessage.className = 'text-gray-400';
+}, 5000);
+}
+
+// Initialize the application
+init();

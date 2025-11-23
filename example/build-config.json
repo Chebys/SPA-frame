@@ -1,10 +1,8 @@
 {
-	"id": "game-2048",
-	"name": "2048",
+	"_ver": 1,
+	"id": "binary-file-viewer",
+	"name": "二进制文件查看器",
+	"version": "0.1",
 	"author": "Arough",
-	"desc": "",
-	"main": "main.js",
-	"preloads": {
-		"body.xml": "text"
-	}
+	"icon": "icon.png"
 }
