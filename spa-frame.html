@@ -5,6 +5,9 @@
 <title>SPA</title>
 <script>window.onload=()=>{
 
+let indexedDB = globalThis.indexedDB
+delete globalThis.indexedDB
+
 let IDBStorage = (()=>{
 
 	Promise.fromIDBRequest ||= req =>
@@ -15,17 +18,13 @@ let IDBStorage = (()=>{
 		})
 
 	const dbPromises = Object.create(null)
-	const indexedDB_open = indexedDB.open.bind(indexedDB)
-	indexedDB.open = ()=>{
-		throw new Error("Access denied. Use ':storage' module instead.")
-	}
 	async function openDB(name, option={}){
 		let {version, stores} = option
 		if(!dbPromises[name]){
-			let req = indexedDB_open(name, version)
+			let req = indexedDB.open(name, version)
 			req.onupgradeneeded = () => stores && ungrade(req.result, stores)
 			dbPromises[name] = Promise.fromIDBRequest(req)
-			req.onblocked = req.$reject //若之前的数据库也通过 openDB 打开，则理论上不会阻塞
+			req.onblocked = ev => req.$reject(new Error('the openDB request is blocked', {cause:ev}))
 			dbPromises[name].catch(err=>{
 				delete dbPromises[name]
 			})
@@ -49,7 +48,7 @@ let IDBStorage = (()=>{
 				stores
 			})
 		}
-		db.onversionchange = ()=>{
+		db.onversionchange ||= ()=>{
 			db.close()
 			delete dbPromises[name]
 		}
@@ -135,7 +134,7 @@ let IDBStorage = (()=>{
 			return Promise.all(promises)
 		}
 	}
-
+	
 	return IDBStorage
 })();
 
@@ -214,7 +213,7 @@ function XHRPromise(url, opts={}){
 }
 async function PackageManager(){
 	//todo: 分离包管理器和应用数据库（后者是运行SPA所必需的，而前者不是）
-  //fixme: 第一次启动时报错数据库版本不匹配
+	await IDBStorage.checkVersion('SPA-frame', 4, ['meta', 'packages', 'packages-meta'])
 	let packagesStore = new IDBStorage('SPA-frame', 'packages')
 	let packagesMeta = new IDBStorage('SPA-frame', 'packages-meta')
 	let hexes = []
