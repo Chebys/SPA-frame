@@ -7,7 +7,7 @@
 * 框架本体。
 * 应用包。
 
-框架本体只有一个文件，即 spa-frame.html。你可以在[发布页](https://github.com/Chebys/SPA-frame/releases)下载该文件，或使用[在线版](https://chebys.pages.dev/html/spa-frame)。
+框架本体只有一个文件，即 spa-frame.html。你可以在[发布页](https://github.com/Chebys/SPA-frame/releases)下载该文件，或使用[在线版](https://spa.x-ze.cn/)。
 
 应用包由应用作者提供。应当为 `.spa` 格式的文件。
 * 本框架目前没有任何生态，因此没有类似应用市场的平台。

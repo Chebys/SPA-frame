@@ -71,7 +71,7 @@ storage模块适用于存储敏感数据或大型二进制数据。
 
 调试工具本质上是一个 SPA，意味着它需要通过应用包进行安装并在 SPA-frame 中运行。
 
-要获取调试工具的安装包，可以下载预构建版本（即[debugger.bin](https://github.com/Chebys/SPA-frame/releases)），也可以从[源代码](debugger)手动构建。还可以使用[在线版](https://chebys.pages.dev/html/spa-frame?fetch=debugger)。
+要获取调试工具的安装包，可以下载预构建版本（即[debugger.bin](https://github.com/Chebys/SPA-frame/releases)），也可以从[源代码](debugger)手动构建。还可以使用[在线版](https://spa.x-ze.cn/app/debugger)。
 
 安装并启动后，根据指引进行操作即可。<!--配置格式与[项目配置](#项目配置)一致。-->
 
@@ -92,19 +92,19 @@ storage模块适用于存储敏感数据或大型二进制数据。
 
 要发布应用，有以下选择：
 * 直接将应用包发送给用户（无论以什么方式），并引导其使用本框架。
-* 将应用包部署到服务器，确保其可通过固定url访问且允许来自 chebys.pages.dev 的跨域请求，构造[远程加载链接](#远程加载链接)并引导用户访问。
-* 将应用包和框架本体部署到服务器并引导用户访问（不推荐，可能有安全问题）。
-* 将应用包提供给框架作者（无论以什么方式），由框架作者将应用包部署到托管平台，构造远程加载链接并引导用户访问。
+* 将应用包提供给框架作者（无论以什么方式），由框架作者将应用包部署到托管平台，构造链接并引导用户访问。
+* 将应用包和框架本体部署到服务器，构造[远程加载链接](#远程加载链接)并引导用户访问。
 
 ### 远程加载链接
-本框架的官方线上版本为 https://chebys.pages.dev/html/spa-frame 。
+<!-- 本框架的官方线上版本为 https://spa.x-ze.cn/ 。 -->
+这需要应用包和框架本体能够在同一个域名下访问。
 
-通过在官方线上版本的url中添加参数，可使得框架被访问时会自动从指定url加载应用包并启动应用。完整的url称作**远程加载链接**。
+通过在 url 中添加参数，可使得框架被访问时会自动从指定url加载应用包并启动应用。完整的 url 称作**远程加载链接**。
 
-例如，应用包的链接为 https://chebys.pages.dev/data/spa/debugger.spa ，则构造的远程加载链接为 https://chebys.pages.dev/html/spa-frame?fetch_url=https%3A%2F%2Fchebys.pages.dev%2Fdata%2Fspa%2Fdebugger.spa 。
+例如，框架的 url 为 https://spa.x-ze.cn/spa-frame ，应用包的 url 为 https://spa.x-ze.cn/package/debugger ，则构造的远程加载链接为 https://spa.x-ze.cn/spa-frame?fetch_url=%2Fpackage%2Fdebugger 。
 
 当用户访问远程加载链接时，框架会根据 `fetch_url` 参数远程加载应用包，显示加载界面，并在加载完成后自动安装、进入应用。
 
-为了避免重复加载，可以添加 `auto_run` 参数，框架会首先检查对应id的应用是否存在，若存在则直接启动，否则进行远程加载。例如 https://chebys.pages.dev/html/spa-frame?auto_run=debugger&fetch_url=https%3A%2F%2Fchebys.pages.dev%2Fdata%2Fspa%2Fdebugger.spa 。
+为了避免重复加载，可以添加 `auto_run` 参数，框架会首先检查对应 id 的应用是否存在，若存在则直接启动，否则进行远程加载。例如 https://spa.x-ze.cn/spa-frame?auto_run=debugger&fetch_url=%2Fpackage%2Fdebugger 。
 
-对于部署到官方托管平台的应用包（上面的例子就是），可以直接在 `fetch` 参数中指定应用包id，例如 https://chebys.pages.dev/html/spa-frame?fetch=debugger 。此时不需要规定 `auto_run` 参数。
+对于部署到官方托管平台的应用包（上面的例子就是），可以直接使用 `https://spa.x-ze.cn/app/<app_id>` 作为 url，例如 https://spa.x-ze.cn/app/debugger ，相当于同时规定了 `auto_run` 和 `fetch_url`。
