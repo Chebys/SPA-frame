@@ -2,9 +2,9 @@ function reloadAndDebug(id){
     location.search = '?auto_run=debugger&package='+id
 }
 
-let { $n } = require(':spa')
+let { $n, applyCSS } = require(':spa')
 let fs = require('fs')
-let store = require(':storage')
+let store = require(':idb').storage('packages')
 let projectList
 
 let ctnStyle = {

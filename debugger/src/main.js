@@ -1,7 +1,8 @@
-let store = require(':storage')
+let store = require(':idb').storage('packages')
 
 async function startDebug(id){
-	let {$n, runApp, loadBlob} = require(':spa')
+	let {$n, loadBlob} = require(':spa')
+	let {runApp} = require(':debug')
 	let fs = require('fs')
 	
 	let config = await store.get(id)
