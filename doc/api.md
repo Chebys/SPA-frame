@@ -23,32 +23,16 @@ return {
 const {name, age} = require('data')
 console.log(name, age)
 ```
-## 全局变量
 
-### Assets
-通过文件名访问 asset 文件，例如 `Assets['style.css']`。
+## Assets
+一个全局对象，通过文件名访问 asset 文件，例如 `Assets['style.css']`。
 
 文件默认为 Blob 对象；可通过元数据中的 `preload` 字段指定其他类型。
-
-### applyCSS
-```js
-applyCSS(text)
-```
-应用css文本。实际上是创建了 CSSStyleSheet 并添加到 document.adoptedStyleSheets。返回 CSSStyleSheet 对象。
-
-### importFont
-```js
-importFont(family, font, format='opentype')
-```
-用于导入字体。
-
-`font` 为 Blob 对象或字符串。为字符串时，等价于 `Assets[font]`。
-
 ## 预加载模块
 
 ### spa
 ```js
-const {$n, FileInput, DownloadBlob} = require(':spa')
+const {$n, applyCSS, importFont, FileInput, DownloadBlob} = require(':spa')
 
 let file = await FileInput('.png')
 DownloadBlob(file, 'copy.png')
@@ -66,10 +50,33 @@ let widget = $n('div', {
 ```
 关于 `$n` 的具体工作原理，见源代码。
 
-### storage
+#### applyCSS
 ```js
-const storage = require(':storage')
+applyCSS(text)
+```
+应用css文本。实际上是创建了 CSSStyleSheet 并添加到 document.adoptedStyleSheets。返回 CSSStyleSheet 对象。
 
+#### importFont
+```js
+importFont(family, font, format='opentype')
+```
+用于导入字体。
+
+`font` 为 Blob 对象或字符串。为字符串时，等价于 `Assets[font]`。
+
+
+### idb
+```js
+const idb = require(':idb')
+// 2 种使用方式：原生或封装
+
+//原生使用
+let request = idb.open(version) //会打开名为 SPA::<AppId> 的数据库，返回 IDBRequest
+
+//使用封装版本
+await idb.checkVersion(version, ['data', 'config'])
+
+const storage = idb.storage('data')
 await storage.get(key)
 await storage.getMany(keys)
 await storage.set(key, value)
@@ -79,6 +86,3 @@ await storage.delMany(keys)
 await storage.keys()
 await storage.entries()
 ```
-目前只能使用字符串作为键。非字符串键会自动转换为字符串。
-
-值可以是任何支持[结构化克隆](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Workers_API/Structured_clone_algorithm)的数据类型。

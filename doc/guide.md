@@ -33,7 +33,7 @@ root/
 | 键           | 说明
 |--------------|---
 | id           | 标识符，使用小写字母+连字符
-| _ver         | API 版本，目前为 1
+| _ver         | API 版本，目前为 2
 | version      | （可选）应用版本，目前仅用于展示
 | name         | 显示名称
 | author       | （可选）作者
@@ -58,11 +58,11 @@ root/
 例子：参考[框架源代码](../spa-frame.html)，尤其是 `MainContainer` 函数和 `showDetails` 函数。
 
 ## 持久化存储
-可以使用原生 localStorage 或 [storage模块](api.md#storage)。
+可以使用原生 localStorage 或 [idb模块](api.md#idb)。
 
 注意：不要在 localStorage 中存储敏感数据，因为可以被其他应用访问！
 
-storage模块适用于存储敏感数据或大型二进制数据。
+idb模块适用于存储敏感数据或大型二进制数据。
 
 ## 调试
 在开发过程中要测试软件，原始的方式是打包并重新安装，这显然带来不便。
