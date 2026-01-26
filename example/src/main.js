@@ -1,8 +1,3 @@
-
-importFont('FontAwesome', 'fontawesome-webfont.ttf')
-applyCSS(Assets['font-awesome.min.css'])
-applyCSS(Assets['style.css'])
-
 require('ui')
 
 // Binary File Viewer - Main Application

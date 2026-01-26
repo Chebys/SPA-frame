@@ -1,8 +1,8 @@
 {
-	"_ver": 1,
+	"_ver": 2,
 	"id": "binary-file-viewer",
 	"name": "二进制文件查看器",
-	"version": "0.1",
+	"version": "0.2",
 	"author": "Arough",
 	"icon": "icon.png"
 }
