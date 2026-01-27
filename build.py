@@ -13,6 +13,7 @@ def readAsDataUrl(file, mime='application/octet-stream'):
     return f'data:{mime};base64,{str(data, 'utf8')}'
 
 default_preloads = {
+    '.txt': 'text',
     '.css': 'text',
     '.json': 'json',
     '.bmp': 'bitmap'

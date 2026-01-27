@@ -193,6 +193,7 @@ function removeFirst(arr, val){
 }
 
 let defaultPreloads = `{
+".txt": "text",
 ".css": "text",
 ".json": "json",
 ".bmp": "bitmap"
