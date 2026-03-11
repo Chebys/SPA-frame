@@ -197,7 +197,7 @@ let defaultPreloads = `{
 ".css": "text",
 ".json": "json",
 ".bmp": "bitmap"
-}`
+}` //应当和 build.py 保持一致
 
 function showConfigScreen(container){
     let dirHandle = null
