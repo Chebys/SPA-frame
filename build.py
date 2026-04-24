@@ -1,4 +1,5 @@
 import sys, os, json
+from mimetypes import types_map
 from base64 import b64encode
 
 config_name = 'build-config.json'
@@ -22,7 +23,7 @@ def build(dirpath, id, _ver, name, version=None, icon=None, author=None, desc=No
     require_path=None, scripts_path='src/', main='src/main.js', overrideType={}, preloads=default_preloads,
     outputpath='test.spa'):
     '''
-    icon 指明 dataurl 或 文件名
+    icon 指明 dataurl 或 文件名；不会被作为asset
     '''
     filelist = []
     files = []
@@ -31,10 +32,11 @@ def build(dirpath, id, _ver, name, version=None, icon=None, author=None, desc=No
         file = open(fp, 'rb')
         fname = fp.replace(os.sep, '/')[len(dirpath)+1:]
         #print(fname)
+        _, ext = os.path.splitext(fname)
         filemeta = {
             'name': fname,
             'size': os.path.getsize(fp),
-            'type': 'script' if fname.endswith('.js') else 'asset'
+            'type': 'script' if ext=='.js' else 'asset'
         }
         if fname in overrideType:
             filemeta['type'] = overrideType[fname]
@@ -42,11 +44,10 @@ def build(dirpath, id, _ver, name, version=None, icon=None, author=None, desc=No
             #filemeta['entrance'] = True
             filemeta['type'] = 'script'
         elif fname==icon:
-            icon_url = readAsDataUrl(file)
+            icon_url = readAsDataUrl(file, types_map.get(ext, ''))
             continue
         elif fname==config_name:
             continue
-        _, ext = os.path.splitext(fname)
         if fname in preloads:
             filemeta['preload'] = preloads[fname]
         elif ext in preloads:
