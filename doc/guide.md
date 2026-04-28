@@ -39,7 +39,7 @@ root/
 | author       | （可选）作者
 | desc         | （可选）描述
 | icon         | （可选）图标，使用 Data URL 或指明文件名
-| main         | （可选）主模块名称
+| main         | （可选）主模块名称，填写完整路径，默认为 `src/main.js`
 | overrideType | （可选）文件类型覆盖，文件名到类型的映射
 | preloads     | （可选）预加载规则，扩展名到预加载类型的映射
 | require_path | 脚本中 require 函数的默认查找目录。

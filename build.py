@@ -1,6 +1,7 @@
 import sys, os, json
 from mimetypes import types_map
 from base64 import b64encode
+from fnmatch import fnmatch
 
 config_name = 'build-config.json'
 
@@ -12,6 +13,12 @@ def scan_files(root_dir):
 def readAsDataUrl(file, mime='application/octet-stream'):
     data = b64encode(file.read())
     return f'data:{mime};base64,{str(data, 'utf8')}'
+
+def match_dict(name, d):
+    for pt, v in d.items():
+        if fnmatch(name, pt):
+            return v
+    return None
 
 default_preloads = {
     '.txt': 'text',
@@ -38,8 +45,9 @@ def build(dirpath, id, _ver, name, version=None, icon=None, author=None, desc=No
             'size': os.path.getsize(fp),
             'type': 'script' if ext=='.js' else 'asset'
         }
-        if fname in overrideType:
-            filemeta['type'] = overrideType[fname]
+        matched_type = match_dict(fname, overrideType)
+        if matched_type:
+            filemeta['type'] = matched_type
         if fname==main:
             #filemeta['entrance'] = True
             filemeta['type'] = 'script'

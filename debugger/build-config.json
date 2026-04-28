@@ -1,7 +1,7 @@
 {
 	"id": "debugger",
 	"_ver": 2,
-	"version": "0.6",
+	"version": "0.7",
 	"name": "Debugger",
 	"author": "Arough",
 	"desc": "调试器",
