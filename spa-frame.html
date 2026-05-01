@@ -37,7 +37,7 @@ let IDBStorage = (()=>{
 		let {version, stores} = option
 		if(!dbPromises[name]){
 			let req = indexedDB.open(name, version)
-			req.onupgradeneeded = () => stores && ungrade(req.result, stores)
+			req.onupgradeneeded = () => stores && upgrade(req.result, stores)
 			dbPromises[name] = Promise.fromIDBRequest(req)
 			req.onblocked = ev => req.$reject(new Error('the openDB request is blocked', {cause:ev}))
 			dbPromises[name].catch(err=>{
@@ -69,7 +69,7 @@ let IDBStorage = (()=>{
 		}
 		return db
 	}
-	function ungrade(db, stores){
+	function upgrade(db, stores){
 		//只能在 upgradeneeded 事件使用
 		//创建缺少的store（多余的会忽略）
 		for(let name of stores)
