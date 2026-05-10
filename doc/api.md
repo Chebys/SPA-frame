@@ -74,7 +74,7 @@ const idb = require(':idb')
 let request = idb.open(version) //会打开名为 SPA::<AppId> 的数据库，返回 IDBRequest
 
 //使用封装版本
-await idb.checkVersion(version, ['data', 'config'])
+let oldVersion = await idb.checkVersion(version, ['data', 'config'])
 
 const storage = idb.storage('data')
 await storage.get(key)
