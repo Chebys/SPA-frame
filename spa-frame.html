@@ -360,7 +360,7 @@ function runApp(app, option={}){
 	//修改以下 API 须变更 API_VERSION
 	globalThis.require = makeRequire('') //用于调试
 	globalThis.Assets = app.assets
-	modules[':spa'] = {$n, applyCSS, importFont, loadBlob, FileInput, DownloadBlob}
+	modules[':spa'] = {$n, $, applyCSS, importFont, loadBlob, FileInput, DownloadBlob}
 	
 	let db_name = 'SPA::'+app.id
 	modules[':idb'] = { //一个应用对应一个 idb，方便卸载时删除
@@ -380,7 +380,7 @@ function runApp(app, option={}){
 }
 
 /*************** 包解析器 ***************/
-const API_VERSION = 5
+const API_VERSION = 6
 const MIN_VERSION = 2
 
 function isCompatible(ver){
@@ -466,7 +466,7 @@ let pkgmanager = {
 const VERSION_TAG = '0.8'
 const OFFICIAL_ORIGIN = 'https://spa.x-ze.cn'
 const IS_OFFICIAL = location.origin==OFFICIAL_ORIGIN
-const OFFICIAL_PACKAGE_PATH = OFFICIAL_ORIGIN+'/package/'
+const OFFICIAL_PACKAGE_PATH = OFFICIAL_ORIGIN+'/package-v2/'
 const SPA_EXT = '.spa'
 const InitParams = new URLSearchParams(location.search)
 
