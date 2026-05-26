@@ -14,6 +14,12 @@ def readAsDataUrl(file, mime='application/octet-stream'):
     data = b64encode(file.read())
     return f'data:{mime};base64,{str(data, 'utf8')}'
 
+def match_list(name, l):
+    for pt in l:
+        if fnmatch(name, pt):
+            return True
+    return False
+
 def match_dict(name, d):
     for pt, v in d.items():
         if fnmatch(name, pt):
@@ -27,7 +33,7 @@ default_preloads = {
     '.bmp': 'bitmap'
 }
 def build(dirpath, id, _ver, name, version=None, icon=None, author=None, desc=None,
-    require_path=None, scripts_path='src/', main='src/main.js', overrideType={}, preloads=default_preloads,
+    require_path=None, scripts_path='src/', main='src/main.js', overrideType={}, preloads=default_preloads, ignore=[],
     outputpath='test.spa'):
     '''
     icon 指明 dataurl 或 文件名；不会被作为asset
@@ -36,9 +42,11 @@ def build(dirpath, id, _ver, name, version=None, icon=None, author=None, desc=No
     files = []
     icon_url = icon if icon and icon.startswith('data:') else None
     for fp in scan_files(dirpath):
-        file = open(fp, 'rb')
         fname = fp.replace(os.sep, '/')[len(dirpath)+1:]
         #print(fname)
+        if match_list(fname, ignore) or fname==config_name:
+            continue
+        file = open(fp, 'rb')
         _, ext = os.path.splitext(fname)
         filemeta = {
             'name': fname,
@@ -53,8 +61,6 @@ def build(dirpath, id, _ver, name, version=None, icon=None, author=None, desc=No
             filemeta['type'] = 'script'
         elif fname==icon:
             icon_url = readAsDataUrl(file, types_map.get(ext, ''))
-            continue
-        elif fname==config_name:
             continue
         if fname in preloads:
             filemeta['preload'] = preloads[fname]
