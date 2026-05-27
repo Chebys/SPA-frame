@@ -1153,6 +1153,7 @@ async function installApp(file, source='本地文件'){
 		app = await parsePackage(file)
 	}catch(err){
 		dialog.showFail('解析失败：\n'+err.message)
+		console.error(err)
 		return
 	}
 	let meta = app.meta
@@ -1297,7 +1298,6 @@ async function launchApp(file){
 		app = await parsePackage(file)
 	}catch(err){
 		alert('解析失败：\n'+err.message)
-		console.error(err)
 		return
 	}
 	runAppWithAlert(app)

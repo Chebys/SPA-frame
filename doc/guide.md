@@ -34,16 +34,17 @@ root/
 |--------------|---
 | id           | 标识符，使用小写字母+连字符
 | _ver         | 目标 API 版本，详见[版本](overview.md#版本)
-| version      | （可选）应用版本，目前仅用于展示
+| version      | 应用版本，小数点分隔的数字
 | name         | 显示名称
 | author       | （可选）作者
 | desc         | （可选）描述
 | icon         | （可选）图标，使用 Data URL 或指明文件名
 | main         | （可选）主模块名称，填写完整路径，默认为 `src/main.js`
-| overrideType | （可选）文件类型覆盖，文件名到类型的映射
+| overrideType | （可选）文件类型覆盖，文件名（支持`*`通配符）到类型的映射
 | preloads     | （可选）预加载规则，扩展名到预加载类型的映射；默认值见打包器源代码
-| require_path | 脚本中 require 函数的默认查找目录
-| scripts_path | 历史遗留参数
+| require_path | 脚本中 [require 函数](api.md#require)的默认查找目录
+| ignore       | （可选）不打包的文件列表，支持通配符
+| compression  | （可选）压缩格式，详见[压缩数据](#压缩数据)
 | outputpath   | （可选）输出路径，默认为 `<id>.spa`
 
 ## 构建界面
@@ -71,9 +72,9 @@ idb模块适用于存储敏感数据或大型二进制数据。
 
 调试工具本质上是一个 SPA，意味着它需要通过应用包进行安装并在 SPA-frame 中运行。
 
-要获取调试工具的安装包，可以下载预构建版本（即[debugger.bin](https://github.com/Chebys/SPA-frame/releases)），也可以从[源代码](debugger)手动构建。还可以使用[在线版](https://spa.x-ze.cn/app/debugger)。
+要获取调试工具的安装包，可以下载预构建版本（即[debugger.spa](https://github.com/Chebys/SPA-frame/releases)），也可以从[源代码](debugger)手动构建。还可以使用[在线版](https://spa.x-ze.cn/app/debugger)。
 
-安装并启动后，根据指引进行操作即可。<!--配置格式与[项目配置](#项目配置)一致。-->
+安装并启动后，根据指引进行操作即可。
 
 备注：部分浏览器可能不支持。
 
@@ -82,10 +83,18 @@ idb模块适用于存储敏感数据或大型二进制数据。
 
 在项目的 `build-config.json` 文件中进行[配置](#项目配置)。
 
-配置完成后，运行 `build.py`，输入项目路径，即可打包。输出文件名为 `<应用id>.spa`。
-<!--使用 [build.py](https://github.com/Chebys/SPA-frame/releases) 进行打包，在项目中添加 build-config.json 以进行配置。参考[示例](example/build-config.json)。
+配置完成后，运行 `build.py`，输入项目路径，即可打包。或者，更便捷地，直接将项目文件夹拖动到打包器上。输出文件名默认为 `<应用id>.spa`。
 
-如果有更个性化的需求，请根据规定的应用包结构自行打包。-->
+项目目录中的绝大多数文件都会被打包（从而通过`Assets`或`require`访问），除了：
+* 配置文件本身；
+* `ignore` 列表中的文件；
+* `icon` 字段规定的文件（它会被编码并放进元数据）。
+<!--如果有更个性化的需求，请根据规定的应用包结构自行打包。-->
+
+### 压缩数据
+很多时候我们希望压缩资源来减小应用包的大小。主要有两种模式：
+1. 对整个包的二进制数据进行压缩。这可以通过配置`compression`字段实现，支持的格式包括`'gzip'`，`'deflate'`，`'deflate-raw'`。打包器会自动进行压缩，框架的包解析器也会自动解压，这个过程对应用运行是透明的（也就是说，无需修改应用代码）。
+1. 对包中的某些文件进行压缩。此时只能手动压缩并在应用代码中手动解压（可以使用框架提供的[decompress函数](api.md#decompress)），不使用`compression`字段（除非你想再整体压缩一遍）。
 
 ## 发布应用
 本框架目前没有任何生态，因此没有完善的发布平台。
@@ -103,7 +112,7 @@ idb模块适用于存储敏感数据或大型二进制数据。
 
 例如，框架的 url 为 https://spa.x-ze.cn/spa-frame ，应用包的 url 为 https://spa.x-ze.cn/package/debugger ，则构造的远程加载链接为 https://spa.x-ze.cn/spa-frame?fetch_url=%2Fpackage%2Fdebugger 。
 
-当用户访问远程加载链接时，框架会根据 `fetch_url` 参数远程加载应用包，显示加载界面，并在加载完成后自动安装、进入应用。
+当用户访问远程加载链接时，框架会根据 `fetch_url` 参数远程加载应用包，显示加载界面，并在加载完成后自动安装、进入应用。`fetch_url` 必须是相对根目录的路径（以`/`开头）。
 
 为了避免重复加载，可以添加 `auto_run` 参数，框架会首先检查对应 id 的应用是否存在，若存在则直接启动，否则进行远程加载。例如 https://spa.x-ze.cn/spa-frame?auto_run=debugger&fetch_url=%2Fpackage%2Fdebugger 。
 

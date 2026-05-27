@@ -48,7 +48,7 @@ console.log(name, age)
 这类模块在主模块运行前就缓存完毕，可以直接导入。
 ### spa
 ```js
-const {$n, $, applyCSS, importFont, FileInput, DownloadBlob} = require(':spa')
+const {$n, $, applyCSS, importFont, FileInput, DownloadBlob, decompress} = require(':spa')
 
 let file = await FileInput('.png')
 DownloadBlob(file, 'copy.png')
@@ -80,6 +80,11 @@ importFont(family, font, format='opentype')
 
 `font` 为 Blob 对象或字符串。为字符串时，等价于 `Assets[font]`。
 
+#### decompress
+```js
+decompress(blob, format): Promise<Blob>
+```
+支持的 format 有`'gzip'`，`'deflate'`，`'deflate-raw'`（实际上取决于前端`DecompressionStream`支持的格式）。
 
 ### idb
 ```js
