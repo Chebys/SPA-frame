@@ -26,6 +26,7 @@ def match_dict(name, d):
             return v
     return None
 
+
 default_preloads = {
     '.txt': 'text',
     '.css': 'text',
@@ -34,7 +35,7 @@ default_preloads = {
 }
 def build(dirpath, id, _ver, name, version=None, icon=None, author=None, desc=None,
     require_path=None, scripts_path='src/', main='src/main.js', overrideType={}, preloads=default_preloads, ignore=[],
-    outputpath='test.spa'):
+    compression=None, outputpath='test.spa'):
     '''
     icon 指明 dataurl 或 文件名；不会被作为asset
     '''
@@ -81,11 +82,26 @@ def build(dirpath, id, _ver, name, version=None, icon=None, author=None, desc=No
     }
     if icon_url:
         meta['icon'] = icon_url
+    if compression:
+        meta['compression'] = compression
     fout = open(outputpath, 'wb')
     fout.write(json.dumps(meta, ensure_ascii=False).encode('utf8'))
     fout.write(b'\0')
-    for file in files:
-        fout.write(file.read())
+    if compression:
+        from zlib import compress
+        data = bytearray()
+        for file in files:
+            data.extend(file.read())
+        wbits_dict = {
+            'deflate': 15,
+            'deflate-raw': -15,
+            'gzip': 31
+        }
+        compressed = compress(data, wbits=wbits_dict[compression])
+        fout.write(compressed)
+    else:
+        for file in files:
+            fout.write(file.read())
 
 try:
     if len(sys.argv) > 1:
