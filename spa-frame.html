@@ -502,7 +502,6 @@ async function init(){
 	let packages = await pkgmanager.list()
 	let autoRun = getAutoRun(packages)
 	if(autoRun){
-		//todo: 可能需要检查新版本
 		pkgmanager.getPackage(autoRun).then(launchApp)
 		return
 	}
@@ -922,20 +921,20 @@ function showDetails(id, meta, cardEl){
 		$.img({src: meta.icon || ICONS.APP, style:{width:'64px', height:'64px', borderRadius:'10px', objectFit:'cover', flex:'0 0 auto'}}),
 		$.div({style:{flex:'1 1 0', textAlign:'left'}}, [
 			$.div({style:{fontWeight:'800', fontSize:'16px', color:'#0f172a'}}, meta.name || id),
-			$.div({style:{fontSize:'12px', color:'#6b7280', marginTop:'4px'}}, '大小：'+sizeText)
+			$.div({style:{fontSize:'12px', color:'#6b7280', marginTop:'4px'}}, '版本：' + (meta.version??'未知')),
+			$.div({style:{fontSize:'12px', color:'#6b7280'}}, '大小：'+sizeText)
 		])
 	])
 	detailPanel.append(header)
 
 	const rows = $.div({style:{width:'100%', textAlign:'left', color:'#374151', marginTop:'6px'}}, [
 		$.div({style:{fontSize:'13px', color:'#6b7280'}}, '作者：' + (meta.author||'未知')),
-		$.div({style:{fontSize:'13px', color:'#6b7280'}}, '版本：' + (meta.version??'未知')),
 		$.div({style:{fontSize:'13px', color:'#6b7280', marginTop:'8px', whiteSpace:'pre-wrap'}}, meta.desc||'暂无描述')
 	])
 	detailPanel.append(rows)
 
 	let metaDiv //元数据
-	const actions = $.div({style:{display:'flex', gap:'8px', marginTop:'12px', width:'100%', justifyContent:'flex-end'}}, [
+	const actions = $.div({style:{display:'flex', gap:'8px', marginTop:'12px', width:'100%', justifyContent:'flex-end', flexWrap:'wrap'}}, [
 		$.button({
 			content: '启动',
 			onclick: ()=>pkgmanager.getPackage(id).then(launchApp),
@@ -1293,14 +1292,31 @@ function createInstallPopup() {
 	return dialog
 }
 async function launchApp(file){
+	let popup = createPopup({
+		content: '正在启动……',
+		style: {
+			background: 'white',
+			padding: '20px',
+			borderRadius: '20px',
+			fontSize: '16px'
+		}
+	})
 	let app
 	try{
 		app = await parsePackage(file)
 	}catch(err){
-		alert('解析失败：\n'+err.message)
+		popup.replaceChildren(
+			$.div({style:'font-weight:bold'}, '解析失败'),
+			$.div({}, err.message),
+			$.button({
+				content: '关闭',
+				style: btnStyle,
+				onclick(){ popup.close() }
+			})
+		)
 		return
 	}
-	runAppWithAlert(app)
+	runAppWithAlert(app) //会自动移除 popup
 }
 
 function cmpVersion(v1, v2){ //不检查合法性
